@@ -52,8 +52,9 @@ class _DemoMethodChannelState extends State<DemoMethodChannel> {
 
   _standardMethodCodec(String model) async {
     try {
-      String result = await defaultPlatform.invokeMethod('getDeviceInfoString', {
-        'type' : 'MODEL',
+      String result =
+          await defaultPlatform.invokeMethod('getDeviceInfoString', {
+        'type': 'MODEL',
       });
 
       if (result != null) {
@@ -70,12 +71,13 @@ class _DemoMethodChannelState extends State<DemoMethodChannel> {
 
   _jsonMethodCodec(String model) async {
     try {
-      String result = await platform.invokeMethod('getDeviceInfo', {
-        'type' : 'MODEL',
+      Map<String, dynamic> result =
+          await platform.invokeMethod('getDeviceInfo', {
+        'type': 'MODEL',
       });
 
       if (result != null) {
-        _deviceInfo2 = result;
+        _deviceInfo2 = result.toString(); //result['model']
       } else {
         _deviceInfo2 = 'can not get device info';
       }
