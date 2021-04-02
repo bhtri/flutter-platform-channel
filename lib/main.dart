@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'channel/method_channel.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Text('Flutter Demo Home Page'),
+      home: DemoMethodChannel(),
     );
   }
 }
