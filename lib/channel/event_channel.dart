@@ -11,8 +11,33 @@ class _DemoEventChannelState extends State<DemoEventChannel> {
   // side native code continuity push event to flutter (update screen)
   static const stream = const EventChannel('stream');
 
+  String _message = 'empty';
+
+  @override
+  void initState() {
+    super.initState();
+
+    stream.receiveBroadcastStream().listen((data) {
+      setState(() {
+        _message = data;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Demo EventChannel'),
+      ),
+      body: Center(
+        child: Container(
+          child: Text(
+            _message,
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+      ),
+    );
   }
 }

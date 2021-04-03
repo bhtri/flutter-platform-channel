@@ -3,6 +3,8 @@ package com.example.flutter_platform_channel;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,7 @@ import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryCodec;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.JSONMessageCodec;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
@@ -44,6 +47,9 @@ public class MainActivity extends FlutterActivity {
         demoBasicMessageChannel2();
         demoBasicMessageChannel3();
         demoBasicMessageChannel4();
+
+        // event channel
+        demoEventChannel();
     }
 
     // region MethodChannel
@@ -182,5 +188,51 @@ public class MainActivity extends FlutterActivity {
             }
         });
     }
+    //endregion
+
+    //region EventChannel
+    public static final String StreamChannel = "stream";
+    Handler handler = new Handler(Looper.getMainLooper());
+
+    private void demoEventChannel() {
+        new EventChannel(getFlutterEngine().getDartExecutor().getBinaryMessenger(), StreamChannel)
+                .setStreamHandler(new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object arguments, EventChannel.EventSink events) {
+                        handler.postDelayed(buildCallBack(events), 500);
+                    }
+
+                    @Override
+                    public void onCancel(Object arguments) {
+
+                    }
+                });
+    }
+
+    int i = 0;
+    Runnable callback;
+
+    private Runnable buildCallBack(EventChannel.EventSink events) {
+        if (callback == null) {
+            callback = new Runnable() {
+                @Override
+                public void run() {
+                    events.success(String.valueOf(i++));
+                    handler.postDelayed(callback, 500);
+                }
+            };
+        }
+        return callback;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(callback != null) {
+            handler.removeCallbacks(callback);
+        }
+        Log.i("Native Code", "onDestroy");
+    }
+
     //endregion
 }
