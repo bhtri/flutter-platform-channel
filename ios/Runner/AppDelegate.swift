@@ -16,6 +16,9 @@ import Flutter
         demoBasicMessageChannel2()
         demoBasicMessageChannel3()
         
+        // EventChannel
+        demoEventChannel()
+        
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
@@ -105,4 +108,40 @@ import Flutter
             
         }
     }
+    
+    // MARK: EventChannel
+    func demoEventChannel() {
+        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+        let event = FlutterEventChannel(name: "stream", binaryMessenger: controller.binaryMessenger)
+        
+        event.setStreamHandler(SwiftStreamHandler())
+    }
+}
+
+// https://stackoverflow.com/a/59759074/6284714
+class SwiftStreamHandler: NSObject, FlutterStreamHandler {
+    var count:Int = 0
+    var timer: Timer?
+    
+    override init() {
+        if #available(iOS 10.0, *) {
+            timer = Timer(timeInterval: 1, repeats: true, block: {  (t) in
+                
+            })
+        } else {
+            // Fallback on earlier versions
+        }
+    }
+    
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        events(self.count)
+        return nil
+    }
+    
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.timer?.invalidate()
+        self.timer = nil
+        return nil
+    }
+    
 }
