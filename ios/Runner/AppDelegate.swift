@@ -3,17 +3,22 @@ import Flutter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    // MethodChannel
-    demoMethodChannel1()
-    demoMethodChannel2()
-    
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        // MethodChannel
+        demoMethodChannel1()
+        demoMethodChannel2()
+        
+        // MessageChannel
+        demoBasicMessageChannel1()
+        demoBasicMessageChannel2()
+        demoBasicMessageChannel3()
+        
+        GeneratedPluginRegistrant.register(with: self)
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
     
     // MARK: MethodChannel
     func demoMethodChannel1() {
@@ -61,6 +66,43 @@ import Flutter
                 }
             }
             result(FlutterMethodNotImplemented)
+        }
+    }
+    
+    // MARK: BasicMessageChannel
+    func demoBasicMessageChannel1() {
+        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+        let messageChannel = FlutterBasicMessageChannel(name: "StringCodec", binaryMessenger: controller.binaryMessenger, codec: FlutterStringCodec.sharedInstance())
+        
+        messageChannel.setMessageHandler { (message, reply) in
+            messageChannel.sendMessage("Hello \(String(describing: message!)) from native code")
+            reply(nil)
+        }
+    }
+    
+    func demoBasicMessageChannel2() {
+        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+        let messageChannel = FlutterBasicMessageChannel(name: "JSONMessageCodec", binaryMessenger: controller.binaryMessenger, codec: FlutterJSONMessageCodec.sharedInstance())
+        
+        messageChannel.setMessageHandler { (message, reply) in
+            var json = [String: Any]()
+            json["name"] = UIDevice.current.name
+            json["batteryLevel"] = UIDevice.current.batteryLevel
+            json["systemVersion"] = UIDevice.current.systemVersion
+            json["systemName"] = UIDevice.current.systemName
+            json["modelName"] = UIDevice.current.model
+            messageChannel.sendMessage(json)
+            reply(nil)
+        }
+    }
+    
+    func demoBasicMessageChannel3() {
+        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+        let messageChannel = FlutterBasicMessageChannel(name: "BinaryCodec", binaryMessenger: controller.binaryMessenger, codec: FlutterBinaryCodec.sharedInstance())
+        
+        messageChannel.setMessageHandler { (message, reply) in
+           // searching
+            
         }
     }
 }
