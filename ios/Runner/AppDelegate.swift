@@ -103,8 +103,14 @@ import Flutter
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
         let messageChannel = FlutterBasicMessageChannel(name: "BinaryCodec", binaryMessenger: controller.binaryMessenger, codec: FlutterBinaryCodec.sharedInstance())
 
-        messageChannel.setMessageHandler { (_, _) in
-           // searching
+        messageChannel.setMessageHandler { (message, reply) in
+
+            guard let _ = Float64.init(String.init(data: message! as! Data, encoding: .utf8)!) else {
+                reply("Can not Convert".data(using: .utf8))
+                return
+            }
+
+            reply("123.456".data(using: .utf8))
 
         }
     }

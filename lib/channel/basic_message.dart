@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,13 +91,29 @@ class _DemoBasicMessageState extends State<DemoBasicMessage> {
                 onPressed: () async {
                   //call Native BinaryCodec
                   print('callNativeBinaryCodec');
-                  final WriteBuffer buffer = WriteBuffer()..putFloat64(1.12345);
-                  final ByteData message = buffer.done();
 
-                  ByteData result = await binaryPlatform.send(message);
-                  setState(() {
-                    _message3 = 'Received ${result.getFloat64(0)}';
-                  });
+                  if (Platform.isAndroid) {
+                    final WriteBuffer buffer = WriteBuffer()
+                      ..putFloat64(1.12345);
+                    final ByteData message = buffer.done();
+
+                    ByteData result = await binaryPlatform.send(message);
+                    setState(() {
+                      _message3 = 'Received ${result.getFloat64(0)}';
+                    });
+                  } else if (Platform.isIOS) {
+                    final tmp = utf8.encoder.convert("1.12345".toString());
+                    ByteData result =
+                        await binaryPlatform.send(tmp.buffer.asByteData());
+
+                    // https://stackoverflow.com/a/54245046/6284714
+                    final buffer = result.buffer;
+                    var list = buffer.asUint8List(
+                        result.offsetInBytes, result.lengthInBytes);
+                    setState(() {
+                      _message3 = utf8.decode(list);
+                    });
+                  }
                 },
                 icon: Icon(Icons.add),
                 label: Text('BinaryCodec'),
