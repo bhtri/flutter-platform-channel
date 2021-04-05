@@ -119,22 +119,23 @@ import Flutter
 }
 
 // https://stackoverflow.com/a/59759074/6284714
+// https://stackoverflow.com/a/26823723/6284714
+// https://stackoverflow.com/a/38696111/6284714
 class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     var count:Int = 0
     var timer: Timer?
+    var eventSink: FlutterEventSink?
     
-    override init() {
-        if #available(iOS 10.0, *) {
-            timer = Timer(timeInterval: 1, repeats: true, block: {  (t) in
-                
-            })
-        } else {
-            // Fallback on earlier versions
+    @objc func onTick() {
+        self.count += 1
+        if let event = self.eventSink {
+            event(String(self.count))
         }
     }
     
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        events(self.count)
+        self.eventSink = events
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(onTick), userInfo: nil, repeats: true)
         return nil
     }
     
