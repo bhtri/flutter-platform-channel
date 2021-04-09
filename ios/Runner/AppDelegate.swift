@@ -15,6 +15,7 @@ import Flutter
         demoBasicMessageChannel1()
         demoBasicMessageChannel2()
         demoBasicMessageChannel3()
+        demoBasicMessageChannel4()
 
         // EventChannel
         demoEventChannel()
@@ -112,6 +113,22 @@ import Flutter
 
             reply("123.456".data(using: .utf8))
 
+        }
+    }
+
+    func demoBasicMessageChannel4() {
+        let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        let messageChannel = FlutterBasicMessageChannel(name: "StandardMessageCodec", binaryMessenger: controller.binaryMessenger, codec: FlutterStandardMessageCodec.sharedInstance())
+
+        messageChannel.setMessageHandler { (message, reply) in
+            guard var list = message as? [Int] else {
+                reply("Can not Convert")
+                return
+            }
+            for i in 0..<list.count {
+                list[i] *= 10
+            }
+            reply(list)
         }
     }
 
