@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'Flutter Platform Template',
+    theme: ThemeData(primarySwatch: Colors.blue),
+    home: MyHomePage(title: 'Flutter Platform '),
+  ));
 }
 
 class MyHomePage extends StatefulWidget {
@@ -27,40 +20,79 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  static const METHOD_CHANNEL_NAME = 'com.bhtri.platform_channels/method';
+  static const EVENT_CHANNEL_NAME = 'com.bhtri.platform_channels/event';
 
-  void _incrementCounter() {
+  static const METHOD_CHANNEL = MethodChannel(METHOD_CHANNEL_NAME);
+  static const EVENT_CHANNEL = EventChannel(EVENT_CHANNEL_NAME);
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _eventListenner(dynamic obj) {
+    debugPrint('Platform Event Result: ');
+    debugPrint(obj);
+  }
+
+  void _callPlatformMethod() async {
+    try {
+      final value = await METHOD_CHANNEL.invokeMethod('helloWorld');
+      debugPrint('Platform Method Result: ');
+      debugPrint(value);
+    } catch (e) {
+      debugPrint(e);
+    }
+  }
+
+  bool _isListen = false;
+  void _callPlatformEvent() async {
     setState(() {
-      _counter++;
+      _isListen = true;
     });
+
+    EVENT_CHANNEL.receiveBroadcastStream().listen(
+      _eventListenner,
+      onDone: () {
+        debugPrint('onDone');
+        setState(() {
+          _isListen = false;
+        });
+      },
+      onError: (err) {
+        debugPrint('onError');
+        debugPrint(err);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            ElevatedButton(
+              onPressed: _callPlatformMethod,
+              child: Text('Call Platform Method'),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            ElevatedButton(
+              onPressed: _isListen == false ? _callPlatformEvent : null,
+              child: Text(
+                  _isListen == false ? 'Call Platform Event' : 'Listenning'),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
